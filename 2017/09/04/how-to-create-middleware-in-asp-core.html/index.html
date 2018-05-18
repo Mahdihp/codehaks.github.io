@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en-us" class="wf-firasans-n4-active wf-active">
+	<head>
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Enable responsiveness on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    
+    
+    <meta name="generator" content="Hugo 0.40.3" />
+    
+    <title>How to Create Middleware in ASP Core &middot; Codehaks</title>
+    <meta content="How to Create Middleware in ASP Core - Codehaks" property="og:title">
+    <meta content=" - " property="og:description">
+    <!-- CSS -->
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,300i,400,400i|Roboto+Mono:300,300i,400,400i" rel="stylesheet">
+    <link rel="stylesheet" href="https://codehaks.github.io/css/print.css" media="print">
+    <link rel="stylesheet" href="https://codehaks.github.io/css/poole.css">
+    <link rel="stylesheet" href="https://codehaks.github.io/css/hyde.css">
+    <!-- Font-Awesome -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js" integrity="sha384-slN8GvtUJGnv6ca26v8EzVaR9DC58QEwsIk9q1QXdCU8Yu8ck/tL/5szYlBbqmS+" crossorigin="anonymous"></script>
+    
+    <!-- Customised CSS -->
+    <link rel="stylesheet" href="https://codehaks.github.io/css/custom.css">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/favicon.png">
+    
+
+	</head>
+    <body>
+        <div class="sidebar">
+	<div class="container text-center sidebar-sticky">
+		<div class="sidebar-about text-center">
+	
+			<a href="https://codehaks.github.io/"><h1 class="brand">Codehaks</h1></a>
+			
+			<p class="lead">
+				 Daily adventures of a web developer 
+			</p>
+		</div>
+		
+<div>
+	<ul class="sidebar-nav">
+		
+		
+		</li>
+	</ul>
+</div>
+
+        <p>
+		<section class="row text-center">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</section>
+
+        </p>
+		<p class="copyright">&copy; 2018 Hakim Ghods.
+        <a href="https://creativecommons.org/licenses/by/4.0">Some Rights Reserved</a>.<br/>Built with <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/htr3n/hyde-hyde">hyde-hyde</a>.
+        </p>
+	</div>
+	<div>
+	</div>
+</div>
+
+        <div class="content container">
+            <div class="post">
+  <h1>How to Create Middleware in ASP Core</h1>
+  
+  <div class="col-sm-12 col-md-12">
+    <span class="text-left post-date meta">
+            
+       
+        <i class="fas fa-calendar-alt"></i> Sep 04, 2017
+      
+      
+      
+      
+      <br/>
+      <i class="fas fa-clock"></i> 3 min read 
+      </span>  
+  </div>    
+  
+  
+
+<p>One of the best features of ASP.NET Core is it&rsquo;s flexible pipeline. You can control what goes into your application&rsquo;s pipeline and add more to it using a <em>Middleware</em>.</p>
+
+<h2 id="sendfile-middleware">SendFile Middleware</h2>
+
+<p>This middleware is just a sample project to see how middlewares are created in ASP.NET Core. I tried to keep it is simple as possible,after all this is my first middleware.</p>
+
+<h2 id="what-it-does">What it does?</h2>
+
+<p>You set a file path at startup and SendFile Middleware sends the file back to user in browser. basically a FileResult directly as a response.</p>
+
+<pre><code class="language-csharp">public class Startup
+    {
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseSendFile(@&quot;C:\myfile.jpg&quot;);
+        }
+    }
+</code></pre>
+
+<p>It can be any kind of file, and user receives it in browser.</p>
+
+<h2 id="sendfile-middleware-explained">SendFile middleware explained</h2>
+
+<p>The basic parts of a middleware in ASP.NET Core is simple. You have to create a class like this :</p>
+
+<pre><code class="language-csharp">internal class SendFileMiddleware
+    {
+        private readonly RequestDelegate _next;
+        private readonly SendFileMiddlewareOptions _options;
+        public SendFileMiddleware(RequestDelegate next, IOptions&lt;SendFileMiddlewareOptions&gt; options)
+        {
+            _options = options.Value;
+            _next = next;
+        }
+        public Task Invoke(HttpContext context)
+        {
+            if (!string.IsNullOrEmpty(_options.FilePath))
+            {
+                var file = new Microsoft.Extensions.FileProviders
+                .Physical.PhysicalFileInfo(
+                    new System.IO.FileInfo(_options.FilePath));
+                context.Response.SendFileAsync(file);
+                return Task.CompletedTask;
+            }
+            else
+            {
+                return Task.CompletedTask;
+            }
+        }
+    }
+</code></pre>
+
+<p>As you can see there is no inheritance involved. You just have to provide a structure. the <strong>_next</strong> property is a request delegate that you use to pass the reponse to next middleware. There is an <strong>options</strong> parameter. if you want to pass data to your middleware you need an <strong>IOptions</strong> interface. Next there is the <strong>Invoke</strong> method. it takes a HttpContext and creates the response then you pass the response to next middleware. you dont have to pass if your middleware is a short-circuit one.</p>
+
+<pre><code class="language-csharp">namespace Codehaks.Middlewares.SendFile
+{
+    public class SendFileMiddlewareOptions
+    {
+        public string FilePath { get; set; }
+    }
+}
+
+</code></pre>
+
+<h2 id="the-extention-method">The extention method</h2>
+
+<p>The best way to present your middleware is to create an Extention method and give other developer the option to call it directly with IApplication parameter.</p>
+
+<pre><code class="language-csharp">
+public static class SendFileMiddlewareExtension
+    {
+        public static IApplicationBuilder UseSendFile(
+            this IApplicationBuilder builder, 
+            SendFileMiddlewareOptions options)
+        {
+            return
+            builder.UseMiddleware&lt;SendFileMiddleware&gt;
+            (Options.Create(options));
+        }
+        public static IApplicationBuilder UseSendFile(
+            this IApplicationBuilder builder, 
+            string filePath)
+        {
+            var options = new SendFileMiddlewareOptions()
+            {
+                FilePath = filePath
+            };
+            return
+            builder.UseMiddleware&lt;SendFileMiddleware&gt;
+            (Options.Create(options));
+        }
+    }
+</code></pre>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Middlewares can solve many problems,Creating them is fairly easy and working with them is fun. But there are many things to watch for. Like when you change response it the pipeline the next middleware is not allowed to chat it again,there are some reasons for that. but thats the topic for an other post.
+SendFile middleware is availbe as a nuget :</p>
+
+<p>[source,C#]
+PM &gt; Install-Package Codehaks.Middlewares.SendFile</p>
+
+<p>you can
+link:view-source:<a href="https://github.com/codehaks/Codehaks.Middlewares.SendFile">https://github.com/codehaks/Codehaks.Middlewares.SendFile</a> source code here.</p>
+
+</div>
+            <div class="footer">
+                
+
+
+        <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+<script type="text/javascript">
+      (function () {
+            
+            
+            
+            if (location.hostname === "localhost" || 
+            	location.hostname === "127.0.0.1" || 
+            	location.hostname === "") {
+                return;
+			}
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            var disqus_shortname = 'codehaks';
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(
+                  dsq);
+      })();
+</script>
+
+<noscript>
+	Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+      
+
+            </div>
+        </div>
+        
+        
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-105746611-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+        
+    </body>
+</html>

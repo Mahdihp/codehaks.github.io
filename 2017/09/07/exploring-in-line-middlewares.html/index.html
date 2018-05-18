@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en-us" class="wf-firasans-n4-active wf-active">
+	<head>
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Enable responsiveness on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    
+    
+    <meta name="generator" content="Hugo 0.40.3" />
+    
+    <title>Exploring in Line Middlewares &middot; Codehaks</title>
+    <meta content="Exploring in Line Middlewares - Codehaks" property="og:title">
+    <meta content=" - " property="og:description">
+    <!-- CSS -->
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,300i,400,400i|Roboto+Mono:300,300i,400,400i" rel="stylesheet">
+    <link rel="stylesheet" href="https://codehaks.github.io/css/print.css" media="print">
+    <link rel="stylesheet" href="https://codehaks.github.io/css/poole.css">
+    <link rel="stylesheet" href="https://codehaks.github.io/css/hyde.css">
+    <!-- Font-Awesome -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js" integrity="sha384-slN8GvtUJGnv6ca26v8EzVaR9DC58QEwsIk9q1QXdCU8Yu8ck/tL/5szYlBbqmS+" crossorigin="anonymous"></script>
+    
+    <!-- Customised CSS -->
+    <link rel="stylesheet" href="https://codehaks.github.io/css/custom.css">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/favicon.png">
+    
+
+	</head>
+    <body>
+        <div class="sidebar">
+	<div class="container text-center sidebar-sticky">
+		<div class="sidebar-about text-center">
+	
+			<a href="https://codehaks.github.io/"><h1 class="brand">Codehaks</h1></a>
+			
+			<p class="lead">
+				 Daily adventures of a web developer 
+			</p>
+		</div>
+		
+<div>
+	<ul class="sidebar-nav">
+		
+		
+		</li>
+	</ul>
+</div>
+
+        <p>
+		<section class="row text-center">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</section>
+
+        </p>
+		<p class="copyright">&copy; 2018 Hakim Ghods.
+        <a href="https://creativecommons.org/licenses/by/4.0">Some Rights Reserved</a>.<br/>Built with <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/htr3n/hyde-hyde">hyde-hyde</a>.
+        </p>
+	</div>
+	<div>
+	</div>
+</div>
+
+        <div class="content container">
+            <div class="post">
+  <h1>Exploring in Line Middlewares</h1>
+  
+  <div class="col-sm-12 col-md-12">
+    <span class="text-left post-date meta">
+            
+       
+        <i class="fas fa-calendar-alt"></i> Sep 07, 2017
+      
+      
+      
+      
+      <br/>
+      <i class="fas fa-clock"></i> 2 min read 
+      </span>  
+  </div>    
+  
+  
+
+<p>In-line middlewares are a simple way to add functionality to ASP.NET Core pipeline without going through a ceremony. In this post I&rsquo;m playing with app.Run and app.Use and see how these two work.</p>
+
+<h2 id="simplest-middleware-possible">Simplest middleware possible</h2>
+
+<p>The best way to understand how a middleware works is to remove the noise around it. so, this is the simplest middleware you can build in ASP.NET Core 2.0.</p>
+
+<pre><code class="language-csharp">app.Run(async (context) =&gt;
+{
+	await context.Response.WriteAsync(&quot;Hello World! 0&quot;);
+});
+</code></pre>
+
+<p>By the way, that is exactly what you get when you create a new project in Visual studio,using the default template.</p>
+
+<p>As this was an exploration, I went a step further and found the actual method in source code.</p>
+
+<pre><code class="language-csharp">public static void 
+Run(this IApplicationBuilder app, RequestDelegate handler)
+        {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+            app.Use(_ =&gt; handler);
+        }
+       
+</code></pre>
+
+<p>So, basically what <strong>app.Run</strong> does is calling the <strong>app.Use</strong> method. but in this case, <strong>app.Run</strong> does not introduce any <strong>next</strong> parameter, so no middleware after <strong>app.Run</strong> would run. This is a short-circuit middleware.</p>
+
+<p>Now, lets take a look at app.Use method under the hood :</p>
+
+<pre><code class="language-csharp">public static IApplicationBuilder Use(this IApplicationBuilder app, Func&lt;HttpContext, Func&lt;Task&gt;, Task&gt; middleware)
+        {
+            return app.Use(next =&gt;
+            {
+                return context =&gt;
+                {
+                    Func&lt;Task&gt; simpleNext = () =&gt; next(context);
+                    return middleware(context, simpleNext);
+                };
+            });
+        }
+</code></pre>
+
+<p>This is also an Extention method,and returning a <strong>RequestDelegate</strong> . so, what is a RequestDelegate !?</p>
+
+<pre><code class="language-csharp">public delegate Task RequestDelegate(HttpContext context);
+</code></pre>
+
+<p>A request delegate is a function that can process an HTTP request. This function returns a Task indicating completion of the request process.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>We can use <strong>app.Use</strong> to simulate <strong>app.Run</strong> method. Basically the <strong>app.Run</strong> is a simpler version of app.Use. Usually you use <strong>app.Run</strong> the the end of your pipeline because it is a short-circuit middleware and does not <strong>Invoke</strong> next middlewares.</p>
+
+<p>There are at least 4 different ways to show &ldquo;Hello,world!&rdquo; using in-line middlewares in ASP.NET Core.</p>
+
+<p>You can see it
+<a href="https://gist.github.com/codehaks/61d026c46c0293435cab375290c24980">https://gist.github.com/codehaks/61d026c46c0293435cab375290c24980</a> here.</p>
+
+</div>
+            <div class="footer">
+                
+
+
+        <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+<script type="text/javascript">
+      (function () {
+            
+            
+            
+            if (location.hostname === "localhost" || 
+            	location.hostname === "127.0.0.1" || 
+            	location.hostname === "") {
+                return;
+			}
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            var disqus_shortname = 'codehaks';
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(
+                  dsq);
+      })();
+</script>
+
+<noscript>
+	Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+      
+
+            </div>
+        </div>
+        
+        
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-105746611-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+        
+    </body>
+</html>

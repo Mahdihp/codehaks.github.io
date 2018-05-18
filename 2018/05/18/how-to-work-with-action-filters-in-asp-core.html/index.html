@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en-us" class="wf-firasans-n4-active wf-active">
+	<head>
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Enable responsiveness on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    
+    
+    <meta name="generator" content="Hugo 0.40.3" />
+    
+    <title>How to work with Action Filters in ASP Core &middot; Codehaks</title>
+    <meta content="How to work with Action Filters in ASP Core - Codehaks" property="og:title">
+    <meta content=" - " property="og:description">
+    <!-- CSS -->
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,300i,400,400i|Roboto+Mono:300,300i,400,400i" rel="stylesheet">
+    <link rel="stylesheet" href="https://codehaks.github.io/css/print.css" media="print">
+    <link rel="stylesheet" href="https://codehaks.github.io/css/poole.css">
+    <link rel="stylesheet" href="https://codehaks.github.io/css/hyde.css">
+    <!-- Font-Awesome -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js" integrity="sha384-slN8GvtUJGnv6ca26v8EzVaR9DC58QEwsIk9q1QXdCU8Yu8ck/tL/5szYlBbqmS+" crossorigin="anonymous"></script>
+    
+    <!-- Customised CSS -->
+    <link rel="stylesheet" href="https://codehaks.github.io/css/custom.css">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/favicon.png">
+    
+
+	</head>
+    <body>
+        <div class="sidebar">
+	<div class="container text-center sidebar-sticky">
+		<div class="sidebar-about text-center">
+	
+			<a href="https://codehaks.github.io/"><h1 class="brand">Codehaks</h1></a>
+			
+			<p class="lead">
+				 Daily adventures of a web developer 
+			</p>
+		</div>
+		
+<div>
+	<ul class="sidebar-nav">
+		
+		
+		</li>
+	</ul>
+</div>
+
+        <p>
+		<section class="row text-center">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</section>
+
+        </p>
+		<p class="copyright">&copy; 2018 Hakim Ghods.
+        <a href="https://creativecommons.org/licenses/by/4.0">Some Rights Reserved</a>.<br/>Built with <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/htr3n/hyde-hyde">hyde-hyde</a>.
+        </p>
+	</div>
+	<div>
+	</div>
+</div>
+
+        <div class="content container">
+            <div class="post">
+  <h1>How to work with Action Filters in ASP Core</h1>
+  
+  <div class="col-sm-12 col-md-12">
+    <span class="text-left post-date meta">
+            
+       
+        <i class="fas fa-calendar-alt"></i> May 18, 2018
+      
+      
+      
+      
+      <br/>
+      <i class="fas fa-clock"></i> 2 min read 
+      </span>  
+  </div>    
+  
+  
+
+<p>Everytime you need to store some data in database you have to validate it first. we usually need to create an if/else block and make sure ModelState is valid and send back some error messages if it&rsquo;s not.</p>
+
+<p>ActionFilters are a great way to implement the DRY principle. Here we are going to create a simple ActionFilter to do the Model Validation before getting into the Action.</p>
+
+<p>The code goes like this :</p>
+
+<pre><code class="language-Csharp">public class ValidateModelAttribute : Attribute, IActionFilter
+    {
+    public void OnActionExecuted(ActionExecutedContext context)
+        {
+            //throw new NotImplementedException();
+        }        
+        public void OnActionExecuting(ActionExecutingContext context)
+        {
+            if (!context.ModelState.IsValid)
+            {
+                var ctrl = (Controller)context.Controller;
+                var view = new ViewResult
+                {
+                    ViewName = context.RouteData.Values[&quot;Action&quot;].ToString(),
+                    ViewData = ctrl.ViewData
+                };
+                context.Result = view;
+            }
+        }
+    }
+</code></pre>
+
+<p>We want to Validate model before running the Action so we have to implement <strong>OnActionExecuting</strong> method from IActionFilter interface. First we use <strong>ActionExecutingContext</strong> to find out if ModelState is valid or not.</p>
+
+<p>If model state is valid then we pass the data to action and everything goes as planned there, But if it&rsquo;s not valid we have to redirect user back to original View containing the same ViewData.</p>
+
+<p>To do that I used <strong>context.Controller</strong> and cast it back to <strong>Controller</strong> then used <strong>Context</strong> to extract action name from route data. This way our filter works with any action in any controller. otherwise we hd to hard core the view name.</p>
+
+<p>At the end by setting up <strong>context.Result</strong> we are telling ASP Core MVC pipeline to skip the rest of the code and generte the view from here.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>ActionFiter is a great way to remove repeatitive code and make it more elegant. it&rsquo;s easier to maintain and less work to re-use. You should remember that ActionFilters run after ModelBinding procedures so if you need to stop pipeline from ModelBinding you need to use other filters.</p>
+
+</div>
+            <div class="footer">
+                
+
+
+        <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+<script type="text/javascript">
+      (function () {
+            
+            
+            
+            if (location.hostname === "localhost" || 
+            	location.hostname === "127.0.0.1" || 
+            	location.hostname === "") {
+                return;
+			}
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            var disqus_shortname = 'codehaks';
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(
+                  dsq);
+      })();
+</script>
+
+<noscript>
+	Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+      
+
+            </div>
+        </div>
+        
+        
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-105746611-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+        
+    </body>
+</html>

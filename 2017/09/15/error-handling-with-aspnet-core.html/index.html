@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en-us" class="wf-firasans-n4-active wf-active">
+	<head>
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Enable responsiveness on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    
+    
+    <meta name="generator" content="Hugo 0.40.3" />
+    
+    <title>Error Handling With ASPNET Core &middot; Codehaks</title>
+    <meta content="Error Handling With ASPNET Core - Codehaks" property="og:title">
+    <meta content=" - " property="og:description">
+    <!-- CSS -->
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,300i,400,400i|Roboto+Mono:300,300i,400,400i" rel="stylesheet">
+    <link rel="stylesheet" href="https://codehaks.github.io/css/print.css" media="print">
+    <link rel="stylesheet" href="https://codehaks.github.io/css/poole.css">
+    <link rel="stylesheet" href="https://codehaks.github.io/css/hyde.css">
+    <!-- Font-Awesome -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js" integrity="sha384-slN8GvtUJGnv6ca26v8EzVaR9DC58QEwsIk9q1QXdCU8Yu8ck/tL/5szYlBbqmS+" crossorigin="anonymous"></script>
+    
+    <!-- Customised CSS -->
+    <link rel="stylesheet" href="https://codehaks.github.io/css/custom.css">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/favicon.png">
+    
+
+	</head>
+    <body>
+        <div class="sidebar">
+	<div class="container text-center sidebar-sticky">
+		<div class="sidebar-about text-center">
+	
+			<a href="https://codehaks.github.io/"><h1 class="brand">Codehaks</h1></a>
+			
+			<p class="lead">
+				 Daily adventures of a web developer 
+			</p>
+		</div>
+		
+<div>
+	<ul class="sidebar-nav">
+		
+		
+		</li>
+	</ul>
+</div>
+
+        <p>
+		<section class="row text-center">
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</section>
+
+        </p>
+		<p class="copyright">&copy; 2018 Hakim Ghods.
+        <a href="https://creativecommons.org/licenses/by/4.0">Some Rights Reserved</a>.<br/>Built with <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/htr3n/hyde-hyde">hyde-hyde</a>.
+        </p>
+	</div>
+	<div>
+	</div>
+</div>
+
+        <div class="content container">
+            <div class="post">
+  <h1>Error Handling With ASPNET Core</h1>
+  
+  <div class="col-sm-12 col-md-12">
+    <span class="text-left post-date meta">
+            
+       
+        <i class="fas fa-calendar-alt"></i> Sep 15, 2017
+      
+      
+      
+      
+      <br/>
+      <i class="fas fa-clock"></i> 2 min read 
+      </span>  
+  </div>    
+  
+  
+
+<p>Error handling is real and it&rsquo;s serious. In ASP.NET Core it&rsquo;s much more easier to handle errors. in this post I&rsquo;m digging into error handling and trying to get some errors !</p>
+
+<h2 id="middlewares">Middlewares</h2>
+
+<p>Like many other features in ASP.NET Core, Error handling is done through middlewares, there is <strong>UseDeveloperExceptionPage()</strong> and <strong>UseExceptionHandler()</strong> to start with. The first one is used to show detailed error information for developers and the second is to redirect users to error page when something goes wrong. Usually you would not use them together, because they override each other. it&rsquo;s a good practice to use a control flow based on Enviroment.</p>
+
+<pre><code class="language-csharp">if (env.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+    else
+    {
+        app.UseExceptionHandler(&quot;/error&quot;);
+    }
+</code></pre>
+
+<h2 id="sample-project">Sample project</h2>
+
+<p>First let&rsquo;s create a sample project that simulates an Exception. Here is my startup.cs using the default web template.</p>
+
+<pre><code class="language-csharp">public class Startup {
+        public void Configure (IApplicationBuilder app) {
+            app.UseDeveloperExceptionPage();
+            app.UseExceptionHandler(&quot;/error&quot;);
+            app.Use (async (context, next) =&gt; {
+                if (context.Request.Path == &quot;/throw&quot;) {
+                    throw new Exception (&quot;Something went wrong!&quot;);
+                }
+                await context.Response.WriteAsync
+                (Environment.NewLine + &quot; No Error&quot;);
+                await next.Invoke();
+            });
+            app.Run (async (context) =&gt; {
+                await context.Response
+                .WriteAsync(Environment.NewLine + context.Request.Path);
+            });
+        }
+    }
+</code></pre>
+
+<p>As you see I used <strong>UseDeveloperExceptionPage</strong> and <strong>UseExceptionHandler</strong> in the same code flow, so user only gets redirected to error page and no error details would be visible to anyone.</p>
+
+<h2 id="error-details">Error details</h2>
+
+<p>To show detailed error page we can remove or comment out the <strong>UseExceptionHandler</strong> middleware.</p>
+
+<pre><code class="language-csharp">//app.UseExceptionHandler(&quot;/error&quot;);
+</code></pre>
+
+<h2 id="throwsing-excpetion">Throwsing excpetion</h2>
+
+<p>To test the excpetion handler I created an In-line middleware with <strong>app.Use()</strong> method.Now When users sends request to &ldquo;/throw&rdquo; url gets an error with detailed information.</p>
+
+<p>To redirect user to error page we need to replace <strong>UseDeveloperExceptionPage</strong> with <strong>UseExceptionHandler</strong> . then we can see <strong>/error</strong> gets written into the response.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>There is much into error handling in ASP.NET Core. The real use of error handling is in MVC projects where there is a lot more code.</p>
+
+</div>
+            <div class="footer">
+                
+
+
+        <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+<script type="text/javascript">
+      (function () {
+            
+            
+            
+            if (location.hostname === "localhost" || 
+            	location.hostname === "127.0.0.1" || 
+            	location.hostname === "") {
+                return;
+			}
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            var disqus_shortname = 'codehaks';
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(
+                  dsq);
+      })();
+</script>
+
+<noscript>
+	Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+      
+
+            </div>
+        </div>
+        
+        
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-105746611-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+        
+    </body>
+</html>
