@@ -97,7 +97,7 @@
   
   
 
-<p>In this post I&rsquo;m exploring what is the bare minimum neccesary code to show &ldquo;Hello Wolrd!&rdquo; in an ASP.NET Core 2.0 Application. bear with me!</p>
+<p>In this post I&rsquo;m exploring what is the bare minimum necessary code to show &ldquo;Hello World!&rdquo; in an ASP.NET Core 2.0 Application. bear with me!</p>
 
 <h2 id="the-template">The template</h2>
 
@@ -127,14 +127,14 @@ namespace BareMinCore
 
 <h2 id="startup-cs">Startup.cs</h2>
 
-<p>This part is a little tricky. I found out that there is no need for consructor or <em>ConfigureServices</em>. But we need the <em>Configure</em> method always. Thats how ASP.NET Core 2.0 works anyway. so this is what I end up with :</p>
+<p>This part is a little tricky. I found out that there is no need for constructor or <em>ConfigureServices</em>. But we need the <em>Configure</em> method always. Thats how ASP.NET Core 2.0 works anyway. so this is what I end up with :</p>
 
 <pre><code class="language-csharp">using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 namespace BareMinCore
 {
     public class Startup
-    {       
+    {
         public void Configure(IApplicationBuilder app)
         {
             app.Run(async (context) =&gt;

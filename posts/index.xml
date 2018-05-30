@@ -23,24 +23,24 @@ The code goes like this :</description>
     </item>
     
     <item>
-      <title>Configurations in ASPNET Core 20</title>
-      <link>https://codehaks.github.io/2017/10/03/configurations-in-aspnet-core-20.html/</link>
+      <title>Configurations in ASP.NET Core 2.0</title>
+      <link>https://codehaks.github.io/2017/10/03/configurations-in-asp.net-core-2.0.html/</link>
       <pubDate>Tue, 03 Oct 2017 13:55:57 +0430</pubDate>
       
-      <guid>https://codehaks.github.io/2017/10/03/configurations-in-aspnet-core-20.html/</guid>
-      <description>With new version of ASP.NET Core configuration system has changed a lot. First it is now injectable into the framework. then you can add custom options to the base Configuration class and access it anywhere needed.
+      <guid>https://codehaks.github.io/2017/10/03/configurations-in-asp.net-core-2.0.html/</guid>
+      <description>With new version of ASP.NET Core configuration system has changed a lot. First it is now inject able into the framework. then you can add custom options to the base Configuration class and access it anywhere needed.
 In this post I&amp;rsquo;m going to list all available configurations in ASP.NET Core 2.0 . and to do that I started by injecting configuration using a constructor.
 public class Startup { public IConfiguration Configuration { get; } public Startup(IConfiguration config) { Configuration=config; } }  From now on we can use Configuration anywhere in the Startup class.</description>
     </item>
     
     <item>
-      <title>Error Handling With ASPNET Core</title>
-      <link>https://codehaks.github.io/2017/09/15/error-handling-with-aspnet-core.html/</link>
+      <title>Error Handling With ASP.NET Core</title>
+      <link>https://codehaks.github.io/2017/09/15/error-handling-with-asp.net-core.html/</link>
       <pubDate>Fri, 15 Sep 2017 13:52:15 +0430</pubDate>
       
-      <guid>https://codehaks.github.io/2017/09/15/error-handling-with-aspnet-core.html/</guid>
+      <guid>https://codehaks.github.io/2017/09/15/error-handling-with-asp.net-core.html/</guid>
       <description>Error handling is real and it&amp;rsquo;s serious. In ASP.NET Core it&amp;rsquo;s much more easier to handle errors. in this post I&amp;rsquo;m digging into error handling and trying to get some errors !
-Middlewares Like many other features in ASP.NET Core, Error handling is done through middlewares, there is UseDeveloperExceptionPage() and UseExceptionHandler() to start with. The first one is used to show detailed error information for developers and the second is to redirect users to error page when something goes wrong.</description>
+Middlewares Like many other features in ASP.NET Core, Error handling is done through Middlewares, there is UseDeveloperExceptionPage() and UseExceptionHandler() to start with. The first one is used to show detailed error information for developers and the second is to redirect users to error page when something goes wrong.</description>
     </item>
     
     <item>
@@ -81,7 +81,7 @@ What it does? You set a file path at startup and SendFile Middleware sends the f
       <pubDate>Thu, 31 Aug 2017 13:02:05 +0430</pubDate>
       
       <guid>https://codehaks.github.io/2017/08/31/bare-minimum-hello-world.html/</guid>
-      <description>In this post I&amp;rsquo;m exploring what is the bare minimum neccesary code to show &amp;ldquo;Hello Wolrd!&amp;rdquo; in an ASP.NET Core 2.0 Application. bear with me!
+      <description>In this post I&amp;rsquo;m exploring what is the bare minimum necessary code to show &amp;ldquo;Hello World!&amp;rdquo; in an ASP.NET Core 2.0 Application. bear with me!
 The template To get the bare minimum in the first place you need to create a project using &amp;ldquo;ASP.NET Core Empty&amp;rdquo; template.
 Program.cs The most important part that you have to change here is the CreateDefaultBuilder Method.There are so many parts that you don&amp;rsquo;t need, Like settings a Logging.</description>
     </item>
@@ -93,8 +93,8 @@ Program.cs The most important part that you have to change here is the CreateDef
       
       <guid>https://codehaks.github.io/2017/08/19/first-3-days-with-asp-core-20.html/</guid>
       <description>About 3 days ago the final version of ASP Core 2.0 released. I installed the new bits and have been playing with it since. here is my experience so far. Fantastic.
-No bugs So far I expericed no bugs. Everything works perfectly. No compatiblity issues like the previews version and no errors. Its fast and reliable.
-.Net Stanard 2.0 Its realy the best part of the new version. it feels more matured than the last version.</description>
+No bugs So far I experienced no bugs. Everything works perfectly. No compatibility issues like the previews version and no errors. Its fast and reliable.
+.Net Standard 2.0 Its really the best part of the new version. it feels more matured than the last version.</description>
     </item>
     
   </channel>
