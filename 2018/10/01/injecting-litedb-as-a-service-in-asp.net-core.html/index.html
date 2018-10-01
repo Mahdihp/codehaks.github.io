@@ -135,50 +135,20 @@
 
 <h2 id="first-step">First Step</h2>
 
-<p>first I used a different class to to keep all necessary configurations separately. For LiteDb we only need a path to create database file.</p>
-
-<pre><code class="language-csharp">public class LiteDbConfig
-    {
-        public string DatabasePath { get; set; }
-    }
-</code></pre>
+<p>first I used a different class to to keep all necessary configurations separately. For LiteDb we only need a path to create database file.
+<script src="https://gist.github.com/codehaks/9ca799a0734f8cc775f0d585febdcca3.js"></script></p>
 
 <h2 id="second-step">Second Step</h2>
 
 <p>Next I added an other class for the actual LiteDb service.</p>
 
-<pre><code class="language-csharp">public class LiteDbContext
-    {
-        public readonly LiteDatabase Context;
-        public LiteDbContext(IOptions&lt;LiteDbConfig&gt; configs)
-        {
-            try
-            {
-                var db = new LiteDatabase(configs.Value.DatabasePath);
-                if (db != null)
-                    Context = db;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(&quot;Can find or create LiteDb database.&quot;, ex);
-            }
-        }           
-    }
-</code></pre>
+<script src="https://gist.github.com/codehaks/12b528749e07d53a7451f14d9162dada.js"></script>
 
 <h2 id="finally">Finally</h2>
 
 <p>The last step would be to add an extension to <em>IServiceCollection</em> interface.</p>
 
-<pre><code class="language-csharp">public static class LiteDbServiceExtension
-    {
-        public static void AddLiteDb(this IServiceCollection services,string databasePath)
-        {
-            services.AddTransient&lt;LiteDbContext, LiteDbContext&gt;();
-            services.Configure&lt;LiteDbConfig&gt;(options =&gt; options.DatabasePath = databasePath);
-        }
-    }
-</code></pre>
+<script src="https://gist.github.com/codehaks/7e19f5e4a545c4f987d244640868c334.js"></script>
 
 <p>Then all we need to do is add &ldquo;usings&rdquo; and call *AddLiteDb&rdquo; in ConfigureServices method at startup.</p>
 
