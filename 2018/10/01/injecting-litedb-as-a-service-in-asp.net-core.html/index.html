@@ -10,8 +10,8 @@
     
     <meta name="generator" content="Hugo 0.40.3" />
     
-    <title>Exploring in Line Middlewares &middot; Codehaks</title>
-    <meta content="Exploring in Line Middlewares - Codehaks" property="og:title">
+    <title>Injecting LiteDb as a service in ASP.NET Core &middot; Codehaks</title>
+    <meta content="Injecting LiteDb as a service in ASP.NET Core - Codehaks" property="og:title">
     <meta content=" - " property="og:description">
     <!-- CSS -->
     <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,300i,400,400i|Roboto+Mono:300,300i,400,400i" rel="stylesheet">
@@ -79,13 +79,13 @@
 
         <div class="content container">
             <div class="post">
-  <h1>Exploring in Line Middlewares</h1>
+  <h1>Injecting LiteDb as a service in ASP.NET Core</h1>
   
   <div class="col-sm-12 col-md-12">
     <span class="text-left post-date meta">
             
        
-        <i class="fas fa-calendar-alt"></i> Sep 07, 2017
+        <i class="fas fa-calendar-alt"></i> Oct 01, 2018
       
       
       
@@ -97,69 +97,103 @@
   
   
 
-<p>In-line middlewares are a simple way to add functionality to ASP.NET Core pipeline without going through a ceremony. In this post I&rsquo;m playing with app.Run and app.Use and see how these two work.</p>
+<h1 id="what-is-it">What is it?</h1>
 
-<h2 id="simplest-middleware-possible">Simplest middleware possible</h2>
+<p>LiteDB is a simple, fast and lightweight embedded .NET document database. LiteDB was inspired by the MongoDB database and its API is very similar to MongoDB&rsquo;s official .NET API.</p>
 
-<p>The best way to understand how a middleware works is to remove the noise around it. so, this is the simplest middleware you can build in ASP.NET Core 2.0.</p>
+<h1 id="how">How</h1>
 
-<pre><code class="language-csharp">app.Run(async (context) =&gt;
-{
-    await context.Response.WriteAsync(&quot;Hello World! 0&quot;);
-});
-</code></pre>
+<p>I have been using LiteDb for some of my smaller projects and I&rsquo;ve got to tell you that so far it has beed satisfying. But my problem was injecting LiteDb as a service inside ASP.NET Core applications. Usually in ASP.NET Core all buit in services are added like this :</p>
 
-<p>By the way, that is exactly what you get when you create a new project in Visual studio,using the default template.</p>
-
-<p>As this was an exploration, I went a step further and found the actual method in source code.</p>
-
-<pre><code class="language-csharp">public static void
-Run(this IApplicationBuilder app, RequestDelegate handler)
+<pre><code class="language-csharp"> public void ConfigureServices(IServiceCollection services)
         {
-            if (app == null)
-            {
-                throw new ArgumentNullException(nameof(app));
-            }
-            if (handler == null)
-            {
-                throw new ArgumentNullException(nameof(handler));
-            }
-            app.Use(_ =&gt; handler);
+            services.AddMvc();
         }
 </code></pre>
 
-<p>So, basically what <strong>app.Run</strong> does is calling the <strong>app.Use</strong> method. but in this case, <strong>app.Run</strong> does not introduce any <strong>next</strong> parameter, so no middleware after <strong>app.Run</strong> would run. This is a short-circuit middleware.</p>
+<p>Of course it&rsquo;s possible to inject your services using &ldquo;Action&rdquo; syntax like this :</p>
 
-<p>Now, lets take a look at app.Use method under the hood :</p>
-
-<pre><code class="language-csharp">public static IApplicationBuilder Use(this IApplicationBuilder app, Func&lt;HttpContext, Func&lt;Task&gt;, Task&gt; middleware)
+<pre><code class="language-csharp"> public void ConfigureServices(IServiceCollection services)
         {
-            return app.Use(next =&gt;
-            {
-                return context =&gt;
-                {
-                    Func&lt;Task&gt; simpleNext = () =&gt; next(context);
-                    return middleware(context, simpleNext);
-                };
-            });
+            ServicesConfig.Register(services);
+        }
+
+         public static void Register(IServiceCollection services)
+        {
+           
+            services.AddTransient&lt;IProductService, ProductService&gt;();
+            services.AddTransient&lt;IOrderService, OrderService&gt;();
         }
 </code></pre>
 
-<p>This is also an Extension method,and returning a <strong>RequestDelegate</strong> . so, what is a RequestDelegate !?</p>
+<p>But thats not what I want. I want to have a neat looking startup. And I have seen a couple of popular frameworks like AutoMapper already using this :</p>
 
-<pre><code class="language-csharp">public delegate Task RequestDelegate(HttpContext context);
+<pre><code class="language-csharp">     services.AddAutoMapper();
 </code></pre>
 
-<p>A request delegate is a function that can process an HTTP request. This function returns a Task indicating completion of the request process.</p>
+<p>I have always wanted to have something similar with my other services.So I tried to implement it for LiteDb.</p>
+
+<h2 id="first-step">First Step</h2>
+
+<p>first I used a different class to to keep all necessary configurations separately. For LiteDb we only need a path to create database file.</p>
+
+<pre><code class="language-csharp">public class LiteDbConfig
+    {
+        public string DatabasePath { get; set; }
+    }
+</code></pre>
+
+<h2 id="second-step">Second Step</h2>
+
+<p>Next I added an other class for the actual LiteDb service.</p>
+
+<pre><code class="language-csharp">public class LiteDbContext
+    {
+        public readonly LiteDatabase Context;
+        public LiteDbContext(IOptions&lt;LiteDbConfig&gt; configs)
+        {
+            try
+            {
+                var db = new LiteDatabase(configs.Value.DatabasePath);
+                if (db != null)
+                    Context = db;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(&quot;Can find or create LiteDb database.&quot;, ex);
+            }
+        }           
+    }
+</code></pre>
+
+<h2 id="finally">Finally</h2>
+
+<p>The last step would be to add an extension to <em>IServiceCollection</em> interface.</p>
+
+<pre><code class="language-csharp">public static class LiteDbServiceExtension
+    {
+        public static void AddLiteDb(this IServiceCollection services,string databasePath)
+        {
+            services.AddTransient&lt;LiteDbContext, LiteDbContext&gt;();
+            services.Configure&lt;LiteDbConfig&gt;(options =&gt; options.DatabasePath = databasePath);
+        }
+    }
+</code></pre>
+
+<p>Then all we need to do is add &ldquo;usings&rdquo; and call *AddLiteDb&rdquo; in ConfigureServices method at startup.</p>
+
+<pre><code class="language-csharp">public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddMvc();
+            services.AddLiteDb(@&quot;bug.db&quot;);
+        }
+</code></pre>
 
 <h2 id="conclusion">Conclusion</h2>
 
-<p>We can use <strong>app.Use</strong> to simulate <strong>app.Run</strong> method. Basically the <strong>app.Run</strong> is a simpler version of app.Use. Usually you use <strong>app.Run</strong> the the end of your pipeline because it is a short-circuit middleware and does not <strong>Invoke</strong> next middlewares.</p>
+<p>Extensions in C# usally help with technical needs but in many cases we use them to add cleaner look in code. The best was to create an extension is to move backwards and start from the end.</p>
 
-<p>There are at least 4 different ways to show &ldquo;Hello,world!&rdquo; using in-line middlewares in ASP.NET Core.</p>
-
-<p>You can see it
-<a href="https://gist.github.com/codehaks/61d026c46c0293435cab375290c24980">https://gist.github.com/codehaks/61d026c46c0293435cab375290c24980</a> here.</p>
+<p>You can download the source code <a href="https://github.com/codehaks/BugPages">https://github.com/codehaks/BugPages</a> here.</p>
 
 </div>
             <div class="footer">

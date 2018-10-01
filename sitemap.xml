@@ -3,17 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://codehaks.github.io/2018/10/01/injecting-litedb-as-a-service-in-asp.net-core.html/</loc>
+    <lastmod>2018-10-01T13:35:59+04:30</lastmod>
+  </url>
+  
+  <url>
     <loc>https://codehaks.github.io/2018/04/18/how-to-work-with-action-filters-in-asp-core.html/</loc>
     <lastmod>2018-04-18T11:10:14+04:30</lastmod>
   </url>
   
   <url>
-    <loc>https://codehaks.github.io/2017/10/03/configurations-in-aspnet-core-20.html/</loc>
+    <loc>https://codehaks.github.io/2017/10/03/configurations-in-asp.net-core-2.0.html/</loc>
     <lastmod>2017-10-03T13:55:57+04:30</lastmod>
   </url>
   
   <url>
-    <loc>https://codehaks.github.io/2017/09/15/error-handling-with-aspnet-core.html/</loc>
+    <loc>https://codehaks.github.io/2017/09/15/error-handling-with-asp.net-core.html/</loc>
     <lastmod>2017-09-15T13:52:15+04:30</lastmod>
   </url>
   
@@ -49,13 +54,13 @@
   
   <url>
     <loc>https://codehaks.github.io/</loc>
-    <lastmod>2018-04-18T11:10:14+04:30</lastmod>
+    <lastmod>2018-10-01T13:35:59+04:30</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://codehaks.github.io/posts/</loc>
-    <lastmod>2018-04-18T11:10:14+04:30</lastmod>
+    <lastmod>2018-10-01T13:35:59+04:30</lastmod>
     <priority>0</priority>
   </url>
   

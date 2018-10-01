@@ -10,8 +10,8 @@
     
     <meta name="generator" content="Hugo 0.40.3" />
     
-    <title>Exploring in Line Middlewares &middot; Codehaks</title>
-    <meta content="Exploring in Line Middlewares - Codehaks" property="og:title">
+    <title>Configurations in ASP.NET Core 2.0 &middot; Codehaks</title>
+    <meta content="Configurations in ASP.NET Core 2.0 - Codehaks" property="og:title">
     <meta content=" - " property="og:description">
     <!-- CSS -->
     <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,300i,400,400i|Roboto+Mono:300,300i,400,400i" rel="stylesheet">
@@ -79,13 +79,13 @@
 
         <div class="content container">
             <div class="post">
-  <h1>Exploring in Line Middlewares</h1>
+  <h1>Configurations in ASP.NET Core 2.0</h1>
   
   <div class="col-sm-12 col-md-12">
     <span class="text-left post-date meta">
             
        
-        <i class="fas fa-calendar-alt"></i> Sep 07, 2017
+        <i class="fas fa-calendar-alt"></i> Oct 03, 2017
       
       
       
@@ -97,69 +97,40 @@
   
   
 
-<p>In-line middlewares are a simple way to add functionality to ASP.NET Core pipeline without going through a ceremony. In this post I&rsquo;m playing with app.Run and app.Use and see how these two work.</p>
+<p>With new version of ASP.NET Core configuration system has changed a lot. First it is now inject able into the framework. then you can add custom options to the base Configuration class and access it anywhere needed.</p>
 
-<h2 id="simplest-middleware-possible">Simplest middleware possible</h2>
+<p>In this post I&rsquo;m going to list all available configurations in ASP.NET Core 2.0 . and to do that I started by injecting configuration using a constructor.</p>
 
-<p>The best way to understand how a middleware works is to remove the noise around it. so, this is the simplest middleware you can build in ASP.NET Core 2.0.</p>
-
-<pre><code class="language-csharp">app.Run(async (context) =&gt;
-{
-    await context.Response.WriteAsync(&quot;Hello World! 0&quot;);
-});
-</code></pre>
-
-<p>By the way, that is exactly what you get when you create a new project in Visual studio,using the default template.</p>
-
-<p>As this was an exploration, I went a step further and found the actual method in source code.</p>
-
-<pre><code class="language-csharp">public static void
-Run(this IApplicationBuilder app, RequestDelegate handler)
+<pre><code class="language-csharp">public class Startup {
+public IConfiguration Configuration { get; }
+    public Startup(IConfiguration config)
         {
-            if (app == null)
-            {
-                throw new ArgumentNullException(nameof(app));
-            }
-            if (handler == null)
-            {
-                throw new ArgumentNullException(nameof(handler));
-            }
-            app.Use(_ =&gt; handler);
+            Configuration=config;
         }
+}
 </code></pre>
 
-<p>So, basically what <strong>app.Run</strong> does is calling the <strong>app.Use</strong> method. but in this case, <strong>app.Run</strong> does not introduce any <strong>next</strong> parameter, so no middleware after <strong>app.Run</strong> would run. This is a short-circuit middleware.</p>
+<p>From now on we can use <strong>Configuration</strong> anywhere in the <strong>Startup</strong> class. My mission is to print all keys and values of Configuration object. I use <strong>Configure</strong> method in startup and create an In-line middleware.</p>
 
-<p>Now, lets take a look at app.Use method under the hood :</p>
-
-<pre><code class="language-csharp">public static IApplicationBuilder Use(this IApplicationBuilder app, Func&lt;HttpContext, Func&lt;Task&gt;, Task&gt; middleware)
-        {
-            return app.Use(next =&gt;
-            {
-                return context =&gt;
+<pre><code class="language-csharp">public void Configure (IApplicationBuilder app) {
+            app.Run (async (context) =&gt; {
+                var keyList = Configuration.GetChildren();
+                var body = &quot;&quot;;
+                foreach (var item in keyList)
                 {
-                    Func&lt;Task&gt; simpleNext = () =&gt; next(context);
-                    return middleware(context, simpleNext);
-                };
+                   body += Environment.NewLine +
+                   item.Key + &quot; : &quot; + item.Value;
+                }
+              await context.Response.WriteAsync(body);
             });
         }
 </code></pre>
 
-<p>This is also an Extension method,and returning a <strong>RequestDelegate</strong> . so, what is a RequestDelegate !?</p>
+<p>First I used <strong>GetChildren()</strong> method of Configuration object to find all the key/value pairs of configuration system and created a body of strings. then passed the body to the middleware. The result is a long list of all settings you have on a Windows OS.</p>
 
-<pre><code class="language-csharp">public delegate Task RequestDelegate(HttpContext context);
-</code></pre>
+<h2 id="conclution">Conclution</h2>
 
-<p>A request delegate is a function that can process an HTTP request. This function returns a Task indicating completion of the request process.</p>
-
-<h2 id="conclusion">Conclusion</h2>
-
-<p>We can use <strong>app.Use</strong> to simulate <strong>app.Run</strong> method. Basically the <strong>app.Run</strong> is a simpler version of app.Use. Usually you use <strong>app.Run</strong> the the end of your pipeline because it is a short-circuit middleware and does not <strong>Invoke</strong> next middlewares.</p>
-
-<p>There are at least 4 different ways to show &ldquo;Hello,world!&rdquo; using in-line middlewares in ASP.NET Core.</p>
-
-<p>You can see it
-<a href="https://gist.github.com/codehaks/61d026c46c0293435cab375290c24980">https://gist.github.com/codehaks/61d026c46c0293435cab375290c24980</a> here.</p>
+<p>It&rsquo;s really fascinating to work with asp.net core configuration. there are so many features. my favorite is that you can create Class and add it to configurations system and with no extra code it is available in <strong>appsettings.json</strong> file.</p>
 
 </div>
             <div class="footer">

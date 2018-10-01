@@ -101,11 +101,11 @@
 
 <h2 id="project-bugvue">Project BugVue</h2>
 
-<p>This is a simple app for tracking bugs. You can Create, Read, Update and Delete the in UI and it all happends in the same view thanks to Vue.js and jQuery AJAX function.</p>
+<p>This is a simple app for tracking bugs. You can Create, Read, Update and Delete the in UI and it all happens in the same view thanks to Vue.js and jQuery AJAX function.</p>
 
 <h3 id="getting-started">Getting started</h3>
 
-<p>The project has two main parts. a <strong>Back-end</strong> which I used ASP.NET Core MVC 2.0 and <strong>Front-end</strong> which I used Vue.js 2.x . I started with the emptey template and added features as I needed. For database I used SQLite and EntityFramework core.</p>
+<p>The project has two main parts. a <strong>Back-end</strong> which I used ASP.NET Core MVC 2.0 and <strong>Front-end</strong> which I used Vue.js 2.x . I started with the empty template and added features as I needed. For database I used SQLite and EntityFramework core.</p>
 
 <p>Bug.cs goes like this :</p>
 
@@ -133,12 +133,12 @@
 <p>There is a DbContextOptions injected into to constructor which is used for sending options to DbContext object without changing the class itself. later we add a DbContext as a service in startup.cs file.</p>
 
 <pre><code class="language-csharp">public class Startup
-    {      
+    {
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext&lt;BugDb&gt;(options =&gt; options.UseSqlite(&quot;DataSource=bug.db&quot;));
             services.AddMvc();
-        }       
+        }
         public void Configure(IApplicationBuilder app)
         {
             app.UseStaticFiles();
@@ -152,7 +152,7 @@
     }
 </code></pre>
 
-<p>I use <strong>options</strong> to pass SQlite and its connection string here. Then I added MVC service and used the middleware to setup the default routing.</p>
+<p>I use <strong>options</strong> to pass Sqlite and its connection string here. Then I added MVC service and used the middleware to setup the default routing.</p>
 
 <h3 id="web-api">Web API</h3>
 
