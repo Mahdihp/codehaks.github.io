@@ -17,8 +17,8 @@
       <pubDate>Mon, 01 Oct 2018 13:35:59 +0430</pubDate>
       
       <guid>https://codehaks.github.io/2018/10/01/injecting-litedb-as-a-service-in-asp.net-core.html/</guid>
-      <description>What is it? LiteDB is a simple, fast and lightweight embedded .NET document database. LiteDB was inspired by the MongoDB database and its API is very similar to MongoDB&amp;rsquo;s official .NET API.
-How I have been using LiteDb for some of my smaller projects and I&amp;rsquo;ve got to tell you that so far it has beed satisfying. But my problem was injecting LiteDb as a service inside ASP.NET Core applications.</description>
+      <description>Intoduction LiteDB is a simple, fast and lightweight embedded .NET document database. LiteDB was inspired by the MongoDB database and its API is very similar to MongoDB&amp;rsquo;s official .NET API.
+Situation I have been using LiteDb for some of my smaller projects and I&amp;rsquo;ve got to tell you that so far it has beed satisfying. But my problem was injecting LiteDb as a service inside ASP.NET Core applications. Usually in ASP.</description>
     </item>
     
     <item>

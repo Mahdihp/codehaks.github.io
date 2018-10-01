@@ -97,11 +97,11 @@
   
   
 
-<h1 id="what-is-it">What is it?</h1>
+<h1 id="intoduction">Intoduction</h1>
 
 <p>LiteDB is a simple, fast and lightweight embedded .NET document database. LiteDB was inspired by the MongoDB database and its API is very similar to MongoDB&rsquo;s official .NET API.</p>
 
-<h1 id="how">How</h1>
+<h1 id="situation">Situation</h1>
 
 <p>I have been using LiteDb for some of my smaller projects and I&rsquo;ve got to tell you that so far it has beed satisfying. But my problem was injecting LiteDb as a service inside ASP.NET Core applications. Usually in ASP.NET Core all buit in services are added like this :</p>
 
@@ -131,20 +131,21 @@
 <pre><code class="language-csharp">     services.AddAutoMapper();
 </code></pre>
 
-<p>I have always wanted to have something similar with my other services.So I tried to implement it for LiteDb.</p>
+<p>Implemention
+I have always wanted to have something similar with my other services.So I tried to implement it for LiteDb.</p>
 
-<h2 id="first-step">First Step</h2>
+<h3 id="first-step">First Step</h3>
 
 <p>first I used a different class to to keep all necessary configurations separately. For LiteDb we only need a path to create database file.
 <script src="https://gist.github.com/codehaks/9ca799a0734f8cc775f0d585febdcca3.js"></script></p>
 
-<h2 id="second-step">Second Step</h2>
+<h3 id="second-step">Second Step</h3>
 
 <p>Next I added an other class for the actual LiteDb service.</p>
 
 <script src="https://gist.github.com/codehaks/12b528749e07d53a7451f14d9162dada.js"></script>
 
-<h2 id="finally">Finally</h2>
+<h3 id="finally">Finally</h3>
 
 <p>The last step would be to add an extension to <em>IServiceCollection</em> interface.</p>
 
