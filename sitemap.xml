@@ -3,7 +3,24 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://codehaks.github.io/2018/11/01/partialview-vs-taghelper--a-performance-comparison.html/</loc>
+    <loc>https://codehaks.github.io/</loc>
+    <lastmod>2019-08-09T10:49:41+03:30</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codehaks.github.io/posts/</loc>
+    <lastmod>2019-08-09T10:49:41+03:30</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codehaks.github.io/2019/08/09/tags-custom-modelbinder.html/</loc>
+    <lastmod>2019-08-09T10:49:41+03:30</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codehaks.github.io/2018/11/01/partialview-vs-taghelper-a-performance-comparison.html/</loc>
     <lastmod>2018-11-01T10:49:41+03:30</lastmod>
   </url>
   
@@ -15,6 +32,11 @@
   <url>
     <loc>https://codehaks.github.io/2018/04/18/how-to-work-with-action-filters-in-asp-core.html/</loc>
     <lastmod>2018-04-18T11:10:14+04:30</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codehaks.github.io/about/</loc>
+    <lastmod>2018-01-01T23:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -54,18 +76,6 @@
   
   <url>
     <loc>https://codehaks.github.io/categories/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://codehaks.github.io/</loc>
-    <lastmod>2018-11-01T10:49:41+03:30</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://codehaks.github.io/posts/</loc>
-    <lastmod>2018-11-01T10:49:41+03:30</lastmod>
     <priority>0</priority>
   </url>
   
